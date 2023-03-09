@@ -11,7 +11,7 @@ const instance = axios.create({
  */
 export default function useApi() {
   const isLoading = ref(false);
-  const result = ref(null);
+  const data = ref(null);
   const error = ref(null);
 
   const execute = async (requestConfig) => {
@@ -26,12 +26,12 @@ export default function useApi() {
 
     try {
       const response = await instance.request(requestConfig);
-      result.value = response.data;
+      data.value = response.data;
 
       return response;
     } catch (e) {
       error.value = e;
-      result.value = null;
+      data.value = null;
     } finally {
       isLoading.value = false;
     }
@@ -39,7 +39,7 @@ export default function useApi() {
 
   return {
     isLoading,
-    result,
+    data,
     error,
     execute,
   };
