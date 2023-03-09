@@ -37,6 +37,40 @@ async function getWetherForecast(lat, lon) {
 }
 
 console.log(getGeocoding, getWetherForecast);
+function getFourDaysWeatherInfoList(weatherInfoList) {
+  const perEightHourInfo = weatherInfoList.filter(
+    (weather, index) => index % 8 === 0
+  );
+  perEightHourInfo.pop();
+  return perEightHourInfo;
+}
+
+function getMinAndMaxTemperature(weatherInfoList) {
+  return weatherInfoList.map((weather) => {
+    const {
+      main: { temp_min, temp_max },
+      dt_txt,
+    } = weather;
+
+    const label = dt_txt.split(' ')[0];
+
+    return {
+      label,
+      min: temp_min,
+      max: temp_max,
+    };
+  });
+}
+
+function getHumidity(weatherInfoList) {
+  return weatherInfoList.map((weather) => {
+    const {
+      main: { humidity },
+    } = weather;
+
+    return humidity;
+  });
+}
 </script>
 <style lang="scss">
 @use 'normalize.css/normalize.css';
