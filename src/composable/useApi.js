@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ref } from 'vue';
 
 const instance = axios.create({
-  baseURL: 'http://api.openweathermap.org',
+  baseURL: 'https://api.openweathermap.org',
 });
 
 export default function useApi() {
