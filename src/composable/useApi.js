@@ -5,15 +5,15 @@ const instance = axios.create({
   baseURL: 'http://api.openweathermap.org',
 });
 
-/**
- *
- * @param {https://axios-http.com/docs/req_config} requestConfig
- */
 export default function useApi() {
   const isLoading = ref(false);
   const data = ref(null);
   const error = ref(null);
 
+  /**
+   *
+   * @param {https://axios-http.com/docs/req_config} requestConfig
+   */
   const execute = async (requestConfig) => {
     isLoading.value = true;
     error.value = null;
