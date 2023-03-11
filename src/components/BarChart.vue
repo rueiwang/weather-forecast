@@ -57,11 +57,11 @@ const barBasicLineStyle = computed(() => {
 
 function barStyle(temperature) {
   const halfTemperature = temperature / 2;
-  let gridRowStart = zeroLinePos.value - Math.round(halfTemperature);
+  let gridRowStart = zeroLinePos.value - Math.floor(halfTemperature);
   let gridRowEnd = zeroLinePos.value;
   if (temperature < 0) {
     gridRowStart = zeroLinePos.value + 1;
-    gridRowEnd = zeroLinePos.value - Math.round(halfTemperature);
+    gridRowEnd = zeroLinePos.value - Math.floor(halfTemperature);
   }
   return {
     'grid-row-start': gridRowStart,

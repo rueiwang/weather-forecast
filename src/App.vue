@@ -288,7 +288,7 @@ async function setNewWeatherInfo(cityName) {
     }
     historyData.value[cityName] = {
       fourDaysList: fourDaysTemperature.value,
-      humidityList: fourDaysTemperature.value,
+      humidityList: fourDaysHumidity.value,
     };
   }
 
@@ -431,11 +431,13 @@ html,
       &-list {
         display: flex;
         gap: 5px;
+        flex-wrap: wrap;
         button {
           cursor: pointer;
           background-color: #f2f4f6;
           padding: 5px 10px;
           border: 1px solid #000;
+          color: #000;
           border-radius: 5px;
           letter-spacing: 0.05em;
           transition: color 0.3s, background-color 0.3s;
