@@ -276,7 +276,7 @@ html,
       border: none;
       height: 100%;
       background-color: #f2f4f6;
-      background-image: url('./assets/icon-search.png');
+      background-image: url('@/assets/icon-search.png');
       background-position: center;
       background-size: 50% auto;
       background-repeat: no-repeat;
