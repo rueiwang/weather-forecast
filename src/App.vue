@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import useApi from '@/composable/useApi.js';
 import PieChart from '@/components/PieChart.vue';
 import BarChart from '@/components/BarChart.vue';
@@ -55,6 +55,56 @@ const errorHint = computed(() => {
   };
 
   return errorMap[searchError.value] || '';
+});
+
+function checkIsLocalStorageAvailable() {
+  try {
+    let storage = window.localStorage;
+    const x = '__storage_test__';
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+const historyData = ref(null);
+const isLocalStorageAvailable = checkIsLocalStorageAvailable();
+
+function getInfoInLocalStorage() {
+  let data = null;
+  if (!isLocalStorageAvailable) return data;
+
+  let lastData = localStorage.getItem('weatherForecast');
+  if (!lastData) return data;
+
+  data = JSON.parse(lastData);
+  return data;
+}
+
+function setInfoInLocalStorage(cityName, fourDaysList, humidityList) {
+  if (!isLocalStorageAvailable) return false;
+  const pendingData = {
+    [cityName]: {
+      fourDaysList,
+      humidityList,
+      timestamp: Date.now(),
+    },
+  };
+  const currentData = getInfoInLocalStorage();
+  if (!currentData) {
+    localStorage.setItem('weatherForecast', JSON.stringify(pendingData));
+  } else {
+    const finalData = Object.assign(currentData, pendingData);
+    localStorage.setItem('weatherForecast', JSON.stringify(finalData));
+  }
+
+  return true;
+}
+
+onMounted(() => {
+  historyData.value = getInfoInLocalStorage();
 });
 
 async function getGeocoding(cityName) {
@@ -162,17 +212,9 @@ function getHumidity(weatherInfoList) {
   });
 }
 
-async function searchByCityName() {
-  searchError.value = '';
-  fourDaysTemperature.value = [];
-  fourDaysHumidity.value = [];
-  if (searchInput.value === '') {
-    searchError.value = 'emptyInputError';
-    return;
-  }
-
+async function setNewWeatherInfo(cityName) {
   const { data: geocodingData, error: geocodingError } = await getGeocoding(
-    searchInput.value.trim()
+    cityName
   );
 
   if (geocodingError) {
@@ -193,6 +235,39 @@ async function searchByCityName() {
 
   fourDaysTemperature.value = getMinAndMaxTemperature(fourDaysWeatherInfoList);
   fourDaysHumidity.value = getHumidity(fourDaysWeatherInfoList);
+
+  setInfoInLocalStorage(
+    cityName,
+    fourDaysTemperature.value,
+    fourDaysHumidity.value
+  );
+}
+
+function checkIsHistoryDataAvailable(cityName) {
+  if (!historyData.value) return false;
+  if (!historyData.value[cityName]) return false;
+  const targetData = historyData.value[cityName];
+  const currentTimestamp = Date.now();
+  const ifPassADay = currentTimestamp - targetData.timestamp >= 86400000;
+  return !ifPassADay;
+}
+
+async function searchByCityName() {
+  searchError.value = '';
+  fourDaysTemperature.value = [];
+  fourDaysHumidity.value = [];
+  const cityName = searchInput.value.trim();
+  if (cityName === '') {
+    searchError.value = 'emptyInputError';
+    return;
+  }
+  if (checkIsHistoryDataAvailable(cityName)) {
+    const targetHistory = historyData.value[cityName];
+    fourDaysTemperature.value = targetHistory.fourDaysList;
+    fourDaysHumidity.value = targetHistory.humidityList;
+  } else {
+    await setNewWeatherInfo(cityName);
+  }
 }
 </script>
 <style lang="scss">
