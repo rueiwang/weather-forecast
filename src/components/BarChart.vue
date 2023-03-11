@@ -1,7 +1,11 @@
 <template>
   <div class="bar-chart">
     <div v-for="info in data" :key="info.label" class="bar-chart-group">
-      <div class="bar" :style="barStyle(info.max)">
+      <div
+        class="bar"
+        :class="{ 'bar-negative': info.min < 0 }"
+        :style="barStyle(info.max)"
+      >
         <div class="bar-temperature">{{ info.max }}{{ unit }}</div>
       </div>
       <div
@@ -39,9 +43,9 @@ const minTemperature = computed(() => {
 
 const zeroLinePos = computed(() => {
   if (minTemperature.value < 0) {
-    return 100 - -minTemperature.value + 1;
+    return 50 - -Math.round(minTemperature.value) + 1;
   } else {
-    return 101;
+    return 51;
   }
 });
 const barBasicLineStyle = computed(() => {
@@ -52,11 +56,12 @@ const barBasicLineStyle = computed(() => {
 });
 
 function barStyle(temperature) {
-  let gridRowStart = zeroLinePos.value - temperature;
+  const halfTemperature = temperature / 2;
+  let gridRowStart = zeroLinePos.value - Math.round(halfTemperature);
   let gridRowEnd = zeroLinePos.value;
   if (temperature < 0) {
     gridRowStart = zeroLinePos.value + 1;
-    gridRowEnd = zeroLinePos.value - temperature;
+    gridRowEnd = zeroLinePos.value - Math.round(halfTemperature);
   }
   return {
     'grid-row-start': gridRowStart,
@@ -68,14 +73,12 @@ function barStyle(temperature) {
 <style scoped lang="scss">
 .bar-chart {
   display: flex;
-  max-width: 60%;
 
   &-group {
     flex: 1;
     display: grid;
-    grid-template-rows: repeat(101, 1fr);
-
-    height: 50vh;
+    grid-template-rows: repeat(51, 1fr);
+    height: 40vh;
     position: relative;
 
     .bar {
@@ -122,6 +125,7 @@ function barStyle(temperature) {
     grid-column-start: 1;
     grid-column-end: 3;
     background-color: #000;
+    z-index: 1;
   }
 }
 </style>

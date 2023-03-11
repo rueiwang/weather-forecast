@@ -3,7 +3,7 @@
     <div class="pie-chart-inside">
       <div>
         <span class="num">{{ percent }}</span
-        ><span class="unit">%</span>
+        ><img src="@/assets/icon-drop.png" alt="humidity" />
       </div>
     </div>
   </div>
@@ -26,14 +26,15 @@ const cssVariables = computed(() => {
 </script>
 <style lang="scss">
 .pie-chart {
+  width: 100%;
   padding-top: 100%;
   border-radius: 50%;
   position: relative;
   background: conic-gradient(skyblue var(--deg), #eee var(--deg));
   &-inside {
     position: absolute;
-    width: 80%;
-    padding-top: 80%;
+    width: 70%;
+    padding-top: 70%;
     border-radius: 50%;
     top: 50%;
     left: 50%;
@@ -46,9 +47,11 @@ const cssVariables = computed(() => {
       left: 50%;
       font-size: 24px;
       transform: translate(-50%, -50%);
-
-      .num {
-        font-size: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      img {
+        width: 28px;
       }
     }
   }
