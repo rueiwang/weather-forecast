@@ -230,6 +230,7 @@ function getMinAndMaxTemperature(weatherInfoList) {
     const {
       main: { temp_min, temp_max },
       dt_txt,
+      weather: [{ icon, description }],
     } = weather;
 
     const label = dt_txt.split(' ')[0];
@@ -238,6 +239,8 @@ function getMinAndMaxTemperature(weatherInfoList) {
       label,
       min: Math.round(temp_min),
       max: Math.round(temp_max),
+      icon,
+      description,
     };
   });
 }

@@ -1,6 +1,11 @@
 <template>
   <div class="bar-chart">
-    <div v-for="info in data" :key="info.label" class="bar-chart-group">
+    <div
+      v-for="info in data"
+      :key="info.label"
+      class="bar-chart-group"
+      :title="info.description"
+    >
       <div
         class="bar"
         :class="{ 'bar-negative': info.min < 0 }"
@@ -16,7 +21,15 @@
         <div class="bar-temperature">{{ info.min }}{{ unit }}</div>
       </div>
       <div class="bar-basic-line" :style="barBasicLineStyle"></div>
-      <div class="bar-label">{{ info.label }}</div>
+      <div class="bar-label">
+        <span>{{ info.label }}</span>
+        <div class="barr-icon">
+          <img
+            :src="`https://openweathermap.org/img/wn/${info.icon}@2x.png`"
+            :alt="info.description"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -118,6 +131,10 @@ function barStyle(temperature) {
       left: 50%;
       transform: translate(-50%);
       text-align: center;
+
+      img {
+        width: 50px;
+      }
     }
   }
 
