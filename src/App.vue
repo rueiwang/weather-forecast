@@ -13,8 +13,21 @@
             />
             <button class="search-btn" @click="searchByCityName"></button>
           </label>
+          <div v-if="validLastSearchCityList.length > 0" class="search-history">
+            <span>History:</span>
+            <div class="search-history-list">
+              <button
+                v-for="city in validLastSearchCityList"
+                :key="city"
+                @click="searchHistory(city)"
+              >
+                {{ city }}
+              </button>
+            </div>
+          </div>
           <span v-if="errorHint" class="search-hint">{{ errorHint }}</span>
         </div>
+
         <div class="page-result">
           <BarChart
             class="page-result-bar-chart"
@@ -103,8 +116,23 @@ function setInfoInLocalStorage(cityName, fourDaysList, humidityList) {
   return true;
 }
 
+// 24 小時內搜尋過的城市名稱
+const validLastSearchCityList = computed(() => {
+  if (!historyData.value) return [];
+  const result = [];
+  for (let cityName of Object.keys(historyData.value)) {
+    if (checkIsHistoryDataAvailable(cityName)) {
+      result.push(cityName);
+    }
+  }
+
+  return result;
+});
+
 onMounted(() => {
   historyData.value = getInfoInLocalStorage();
+  searchInput.value = 'Taipei';
+  searchByCityName();
 });
 
 async function getGeocoding(cityName) {
@@ -236,11 +264,20 @@ async function setNewWeatherInfo(cityName) {
   fourDaysTemperature.value = getMinAndMaxTemperature(fourDaysWeatherInfoList);
   fourDaysHumidity.value = getHumidity(fourDaysWeatherInfoList);
 
-  setInfoInLocalStorage(
+  const isSetSuccess = setInfoInLocalStorage(
     cityName,
     fourDaysTemperature.value,
     fourDaysHumidity.value
   );
+  if (isSetSuccess) {
+    if (!historyData.value) {
+      historyData.value = {};
+    }
+    historyData.value[cityName] = {
+      fourDaysList: fourDaysTemperature.value,
+      humidityList: fourDaysTemperature.value,
+    };
+  }
 }
 
 function checkIsHistoryDataAvailable(cityName) {
@@ -250,6 +287,18 @@ function checkIsHistoryDataAvailable(cityName) {
   const currentTimestamp = Date.now();
   const ifPassADay = currentTimestamp - targetData.timestamp >= 86400000;
   return !ifPassADay;
+}
+
+function searchHistory(cityName) {
+  searchError.value = '';
+  searchInput.value = cityName;
+  setHistoryWeatherInfo(cityName);
+}
+
+function setHistoryWeatherInfo(cityName) {
+  const targetHistory = historyData.value[cityName];
+  fourDaysTemperature.value = targetHistory.fourDaysList;
+  fourDaysHumidity.value = targetHistory.humidityList;
 }
 
 async function searchByCityName() {
@@ -262,9 +311,7 @@ async function searchByCityName() {
     return;
   }
   if (checkIsHistoryDataAvailable(cityName)) {
-    const targetHistory = historyData.value[cityName];
-    fourDaysTemperature.value = targetHistory.fourDaysList;
-    fourDaysHumidity.value = targetHistory.humidityList;
+    setHistoryWeatherInfo(cityName);
   } else {
     await setNewWeatherInfo(cityName);
   }
@@ -316,14 +363,13 @@ html,
   &-search {
     display: flex;
     width: 100%;
-    justify-content: center;
     margin-bottom: 20px;
     flex-wrap: wrap;
     letter-spacing: 0.05em;
 
     .search-label {
       width: 100%;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       display: flex;
       border: 2px solid #000;
       border-radius: 5px;
@@ -358,6 +404,33 @@ html,
       cursor: pointer;
     }
 
+    .search-history {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      span {
+        margin-right: 5px;
+        letter-spacing: 0.05em;
+      }
+      &-list {
+        display: flex;
+        gap: 5px;
+        button {
+          cursor: pointer;
+          background-color: #f2f4f6;
+          padding: 5px 10px;
+          border: 1px solid #000;
+          border-radius: 5px;
+          letter-spacing: 0.05em;
+          transition: color 0.3s, background-color 0.3s;
+
+          &:hover {
+            background-color: #000;
+            color: #fff;
+          }
+        }
+      }
+    }
     .search-hint {
       width: 100%;
       text-align: center;
