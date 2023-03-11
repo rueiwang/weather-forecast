@@ -29,15 +29,18 @@
         </div>
 
         <div class="page-result">
+          <div v-if="isLoading" class="result-loading">
+            <img src="@/assets/icon-loading.png" alt="loading" />
+          </div>
           <BarChart
-            class="page-result-bar-chart"
+            class="result-bar-chart"
             :data="fourDaysTemperature"
           ></BarChart>
-          <div class="page-result-pie-chart-list">
+          <div class="result-pie-chart-list">
             <div
               v-for="(percent, i) in fourDaysHumidity"
               :key="percent.toString() + i"
-              class="page-result-pie-chart"
+              class="result-pie-chart"
             >
               <PieChart :percent="percent"></PieChart>
             </div>
@@ -49,7 +52,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import useApi from '@/composable/useApi.js';
 import PieChart from '@/components/PieChart.vue';
 import BarChart from '@/components/BarChart.vue';
@@ -69,6 +72,15 @@ const errorHint = computed(() => {
 
   return errorMap[searchError.value] || '';
 });
+const isLoading = ref(false);
+watch(
+  () => searchError.value,
+  (newError) => {
+    if (newError) {
+      isLoading.value = false;
+    }
+  }
+);
 
 function checkIsLocalStorageAvailable() {
   try {
@@ -241,6 +253,7 @@ function getHumidity(weatherInfoList) {
 }
 
 async function setNewWeatherInfo(cityName) {
+  isLoading.value = true;
   const { data: geocodingData, error: geocodingError } = await getGeocoding(
     cityName
   );
@@ -278,6 +291,8 @@ async function setNewWeatherInfo(cityName) {
       humidityList: fourDaysTemperature.value,
     };
   }
+
+  isLoading.value = false;
 }
 
 function checkIsHistoryDataAvailable(cityName) {
@@ -302,6 +317,7 @@ function setHistoryWeatherInfo(cityName) {
 }
 
 async function searchByCityName() {
+  if (isLoading.value) return;
   searchError.value = '';
   fourDaysTemperature.value = [];
   fourDaysHumidity.value = [];
@@ -443,19 +459,36 @@ html,
     width: 100%;
   }
 
-  &-result-bar-chart {
+  .result-loading {
+    @keyframes spin {
+      0% {
+        transform: rotate(0);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    text-align: center;
+    img {
+      transform-origin: center;
+      animation: spin 2s infinite linear;
+    }
+  }
+
+  .result-bar-chart {
     margin: 0 auto;
     margin-bottom: 20px;
   }
 
-  &-result-pie-chart-list {
+  .result-pie-chart-list {
     display: flex;
     margin: 0 auto;
     gap: 20px;
     justify-content: center;
   }
 
-  &-result-pie-chart {
+  .result-pie-chart {
     width: 25%;
     padding: 0 5%;
   }
@@ -471,7 +504,7 @@ html,
       width: 100%;
     }
 
-    &-result-pie-chart {
+    .result-pie-chart {
       width: 25%;
       padding: 0 1%;
 
