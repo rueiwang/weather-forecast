@@ -2,7 +2,7 @@
   <div class="page">
     <div class="container">
       <div class="page-content">
-        <h1>Weather forecast</h1>
+        <h1>Weather Forecast</h1>
         <div class="page-search">
           <label class="search-label" for="search-input">
             <input
@@ -368,6 +368,7 @@ html,
     align-items: center;
     padding: 0 10px;
     height: 100%;
+    max-width: 960px;
   }
 
   &-content {
